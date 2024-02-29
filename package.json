@@ -3,7 +3,9 @@
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
-  "scripts": {},
+  "scripts": {
+    "all-tests": "npx playwright test --workers=2 --retries=1"
+  },
   "keywords": [],
   "author": "",
   "license": "ISC",
