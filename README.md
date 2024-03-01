@@ -4,7 +4,7 @@
 
 ## How to run tests?
 
-- `npx playwright test` - Running all tests
+- `npm run all-tests` - Running all tests
 - `npx playwright test selectFacet.spec.ts` - Running a single test file
 
 ## Useful links
