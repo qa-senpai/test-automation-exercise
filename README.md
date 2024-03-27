@@ -1,3 +1,9 @@
+
+Якщо ви хочете підтримати мене, і закинути трохи гривень можете зробити це тут 
+https://donatello.to/qasenpai
+
+------------------------------------------------------------------------------
+
 # Exercise
 
 1. Navigate to [Douglas](https://www.douglas.de/de)
@@ -32,7 +38,7 @@ https://github.com/rmarinsky/test_task_DE
 -- Playwright+Python
 https://github.com/bklyuka/test_task
 
-
+------------------------------------------------------------------------------
 ## Installation
 
 - `npm i` to install all
