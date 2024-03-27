@@ -24,7 +24,7 @@ TDD data
 -Means criteria is not applicable
 
 - Please walk through the code. Feel free to use your own IDE, tool and framework of your choice.
-- 
+
 ●	Best Practices: What were the best practices that you have incorporated? What code optimizations have you done? 
 
 ●	Execution: Please execute on couple of browsers 
