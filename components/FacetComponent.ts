@@ -1,37 +1,28 @@
-import { Locator } from '@playwright/test';
+import { $, WebElement } from 'playwright-elements';
 
-// компонент це не сторінка і не повинна залежати від сторінки.
-// також можна не тримати селектори у стрінгах у більшості випадків
-export class FacetComponent {
-  private rootLocator: Locator;
-  facetMenu: Locator;
-  search: Locator;
-  options: Locator;
-  plates: Locator;
-
-  constructor(rootLocator: Locator) {
-    this.rootLocator = rootLocator;
-    this.facetMenu = this.rootLocator.locator('[class=facet__menu]');
-    this.search = this.rootLocator.locator('[name=facet-search]')
-    this.options = this.rootLocator.locator('[role="checkbox"].facet-option');
-    this.plates = this.rootLocator.locator('[class*="title"][data-testid]');
-  }
-
-  // ті всі методи з одним рядком коду які в кінці роблять клік ))
-  // є сенс обгортати тільки методи з логікю інакше в реальному ентерпрайз проекті з тисячами тастів ти втонеш в тих маленьких методах які не приносять велю твоїй структурі
-
-  async selectFacet(facet: string) {
-    const target = this.options.filter({ hasText: new RegExp(`^${facet}$`) }); // регепс бо за замовчуванням воно як контейнс працює
-    await target.scrollIntoViewIfNeeded();
-    await target.locator('.facet-option__checkbox.facet-option__checkbox').click();
-  }
-
-  async selectRandomFacet(): Promise<string> {
-    await this.options.last().waitFor();
-    const count = await this.options.count();
-    const targetFacetText = await this.options.nth(Math.floor(Math.random() * (count - 1))).textContent() ?? '';
-    await this.selectFacet(targetFacetText)
-    return targetFacetText;
-  }
-
-}
+// playwright-elements допомагає відобразити деревоподібну струкруту веб компоненту де кожен може мати багато нащадків і всі елементи дерева портують апі Locator
+// кожен елемент може повернути ланцюжок локаторів facetComponent.facetMenu.locator or facetComponent.facetMenu._ поверне вам page.locator('.facet-wrapper:not([class*=hidden])').locator('[name=facet-search]')
+// але при тому зберігає варіативність в чейнінгу.
+export const facetComponent = $('.facet-wrapper:not([class*=hidden])')
+    .with({
+      facetMenu: $('[class=facet__menu]'),
+      search: $('[name=facet-search]'),
+      options: $('[role="checkbox"].facet-option')
+          .with({
+            checkbox: $('.facet-option__checkbox.facet-option__checkbox'), // раніше цей чекбокс був зашитий в методі бо інакше неможливо було його зачейнити після фільтру
+            // таке використання this зветься fake this
+            async selectFacet(this: WebElement & { checkbox: WebElement  }, facet: string) {
+                const target = this.filter({ hasText: new RegExp(`^${facet}$`) });
+                await target.scrollIntoViewIfNeeded();
+                // тепер повноцінна деревоподібна структура дозвоняє спершу відфільтрувати ліст і потім викликати необхідного чаєлд елемента для взаєжмодії
+                await target.checkbox.click();
+            },
+            async selectRandomFacet(this: WebElement & { selectFacet: (text: string) => Promise<void>}): Promise<string> {
+                await this.last().waitFor();
+                const targetFacetText = await this.nth(Math.floor(Math.random() * (await this.count() - 1))).textContent() ?? '';
+                await this.selectFacet(targetFacetText);
+                return targetFacetText;
+            }
+          }),
+      plates: $('[class*="title"][data-testid]'),
+    });

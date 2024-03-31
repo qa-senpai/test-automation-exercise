@@ -1,15 +1,16 @@
-import { chromium } from '@playwright/test';
+import { BrowserInstance, BrowserName } from 'playwright-elements';
 import { baseUrl, sessionJsonPath } from '@test.data';
-import {CookiesModal} from "@modals";
+import { cookiesModal } from '@modals';
 
+// зверніть увагу що немає потреби зберігати інстанс браузера чи пейджу в змінні.
+// це доречі ніяк не вприває на здатність фреймворку до паралельного виконання тестів чи виконання коду в різних контекстах паралельно в промісах...
 export default async function globalSetup() {
-    const browser = await chromium.launch();
-    const page = await browser.newPage();
-    await page.goto(baseUrl, { waitUntil: 'domcontentloaded'});
-    const cookiesModal = new CookiesModal(page.getByRole('dialog'));
-    await cookiesModal.modalTitle.waitFor(); // візібіліті де дефолтний кондишн для ветйту не потребує обгортки
-    await cookiesModal.acceptAllButton.click(); // немає сенсу інкапсулювати дефолтні методи для одиночних елементів
-    await cookiesModal.rootLocator.waitFor({ state: 'hidden' });
-    await page.context().storageState({ path: sessionJsonPath }); // щоб не прийшлось закривати вікно з кукі в кожному тесті.
-    await browser.close();
+    await BrowserInstance.start(BrowserName.CHROMIUM);
+    await BrowserInstance.startNewPage();
+    await BrowserInstance.currentPage.goto(baseUrl, { waitUntil: 'domcontentloaded' });
+    await cookiesModal.modalTitle.waitFor();
+    await cookiesModal.acceptAllButton.click();
+    await cookiesModal.waitFor({ state: 'hidden' });
+    await BrowserInstance.currentContext.storageState({ path: sessionJsonPath });
+    await BrowserInstance.close();
 }

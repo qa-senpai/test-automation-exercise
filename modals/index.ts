@@ -1,1 +1,1 @@
-export * from './AcceptCookiesModal';
+export * from './modals';

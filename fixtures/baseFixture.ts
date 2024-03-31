@@ -1,4 +1,4 @@
-import { test as base } from '@playwright/test';
+import { test as base } from 'playwright-elements';
 import { ParfumPage } from '@page.object';
 
 type Fixture = {
@@ -6,10 +6,12 @@ type Fixture = {
 };
 
 export const test = base.extend<Fixture>({
-  // не потрібно перевизначати фікстуру пейдж бо це повпливає на поведінку у всіх тестах навіть де ця пейджа може не бути потрібною.
-  parfumPage: async ({ page }, use) => {
-    const parfumPage = new ParfumPage(page);
-    await parfumPage.navigateToParfumPage();
-    await use(parfumPage);
+  // playwright-elements
+  parfumPage: async ({ goto }, use) => {
+    await goto('/c/parfum/01', {
+      waitUntil: 'domcontentloaded',
+      timeout: 60000,
+    });
+    await use(new ParfumPage());
   },
 });
