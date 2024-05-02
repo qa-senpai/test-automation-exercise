@@ -38,6 +38,9 @@ https://github.com/hlazkov/unitedcode-taf
 -- Playwright+TS (HOT Testing)
 https://github.com/Xotabu4/test-task-pasha-sempai
 
+-- Playwright+TST (DanteUkraine)
+https://github.com/DanteUkraine/test-automation-exercise/tree/solutionAsAverageSenior
+
 -- Kotlin (not finished)
 https://github.com/rmarinsky/test_task_DE
 
