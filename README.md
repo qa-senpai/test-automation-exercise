@@ -35,6 +35,9 @@ TDD data
 -- Playwright+TS
 https://github.com/hlazkov/unitedcode-taf
 
+-- Playwright+TS (HOT Testing)
+https://github.com/Xotabu4/test-task-pasha-sempai
+
 -- Kotlin (not finished)
 https://github.com/rmarinsky/test_task_DE
 
