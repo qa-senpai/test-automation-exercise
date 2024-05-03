@@ -4,13 +4,14 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "all-tests": "npx playwright test --workers=2 --retries=1"
+    "all-tests": "npx playwright test --workers=2"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "devDependencies": {
     "@playwright/test": "^1.42.0",
+    "playwright-elements": "1.13.0",
     "@types/node": "^20.11.22"
   }
 }

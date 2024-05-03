@@ -1,76 +1,28 @@
-import { Page } from "@playwright/test";
+import { $, WebElement } from 'playwright-elements';
 
-export class FacetComponent {
-  private page: Page;
-  private selectors: FacetComponentSelectors;
-
-  constructor(page: Page) {
-    this.page = page;
-    this.selectors = new FacetComponentSelectors();
-  }
-
-  async clickFacetPlateByTitle(title: string) {
-    await this.page
-      .locator(this.selectors.facetPlate(title))
-      .click({ timeout: 10000 });
-  }
-
-  async clickFacetByTitle(title: string) {
-    await this.page
-      .locator(this.selectors.facetCheckbox(title))
-      .click({ timeout: 10000 });
-  }
-
-  async clickCloseFacetList() {
-    await this.page
-      .locator(this.selectors.closeButton)
-      .click({ timeout: 10000 });
-  }
-
-  async fillFacetSearch(text: string) {
-    await this.page.locator(this.selectors.facetSearchInput).fill(text);
-  }
-
-  async getSearchVisibility() {
-    return this.page
-      .locator(this.selectors.facetSearchInput)
-      .isVisible({ timeout: 10000 });
-  }
-
-  async getSelectedFacetButtonVisibility(facetTitle: string) {
-    try {
-      await this.page
-        .locator(this.selectors.selectedFacetButton(facetTitle))
-        .waitFor({ timeout: 5000, state: "visible" });
-    } catch {}
-
-    return this.page
-      .locator(this.selectors.selectedFacetButton(facetTitle))
-      .isVisible();
-  }
-}
-
-class FacetComponentSelectors {
-  private facetMenu = '//*[@class="facet__menu"]';
-
-  facetPlate = (text: string) => {
-    return `//*[contains(@class, 'facet-wrapper')]//*[@data-testid and text()='${text}']`;
-  };
-
-  facetCheckbox = (text: string) => {
-    return (
-      this.facetMenu +
-      `//*[contains(@class, 'facet-option')]//*[starts-with(text(), '${text}')]`
-    );
-  };
-
-  facetSearchInput = this.facetMenu + `//input[name="facet-search"]`;
-
-  closeButton =
-    this.facetMenu +
-    `//*[@type = 'button' and contains(@class, 'close-button')]`;
-
-  selectedFacetButton = (text: string) => {
-    return `//*[@class = 'selected-facets']//button[text() = '${text}']`;
-  };
-}
+// playwright-elements допомагає відобразити деревоподібну струкруту веб компоненту де кожен може мати багато нащадків і всі елементи дерева портують апі Locator
+// кожен елемент може повернути ланцюжок локаторів facetComponent.facetMenu.locator or facetComponent.facetMenu._ поверне вам page.locator('.facet-wrapper:not([class*=hidden])').locator('[name=facet-search]')
+// але при тому зберігає варіативність в чейнінгу.
+export const facetComponent = $('.facet-wrapper:not([class*=hidden])')
+    .with({
+      facetMenu: $('[class=facet__menu]'),
+      search: $('[name=facet-search]'),
+      options: $('[role="checkbox"].facet-option')
+          .with({
+            checkbox: $('.facet-option__checkbox.facet-option__checkbox'), // раніше цей чекбокс був зашитий в методі бо інакше неможливо було його зачейнити після фільтру
+            // таке використання this зветься fake this
+            async selectFacet(this: WebElement & { checkbox: WebElement  }, facet: string) {
+                const target = this.filter({ hasText: new RegExp(`^${facet}$`) });
+                await target.scrollIntoViewIfNeeded();
+                // тепер повноцінна деревоподібна структура дозвоняє спершу відфільтрувати ліст і потім викликати необхідного чаєлд елемента для взаєжмодії
+                await target.checkbox.click();
+            },
+            async selectRandomFacet(this: WebElement & { selectFacet: (text: string) => Promise<void>}): Promise<string> {
+                await this.last().waitFor();
+                const targetFacetText = await this.nth(Math.floor(Math.random() * (await this.count() - 1))).textContent() ?? '';
+                await this.selectFacet(targetFacetText);
+                return targetFacetText;
+            }
+          }),
+      plates: $('[class*="title"][data-testid]'),
+    });
